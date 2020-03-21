@@ -1,5 +1,18 @@
 #!/bin/bash
 
+
+############################################################
+#           function to call command
+############################################################
+execute_command() {
+
+    adb_cmd="${adb_cmd} $1"
+    echo ${adb_cmd}
+    output=$(eval "$adb_cmd")
+    echo "$output"
+    exit 1
+}
+
 if [ ! "$1" ]; then
    echo "--------- Empty argument, please run"
 fi
@@ -48,9 +61,8 @@ if  [[ $operation = "-reboot" ]]; then
 #           command reboot device
 ############################################################
 
-    echo "--------- Reboot"
-    adb reboot
-    exit 1
+    echo "--------- Reboot"    
+    execute_command "reboot"
 fi
 
 if  [[ $operation = "-lock" ]]; then
@@ -59,11 +71,7 @@ if  [[ $operation = "-lock" ]]; then
 ############################################################
 
     echo "--------- Lock screen"
-    adb_cmd="${adb_cmd} shell input keyevent 26"
-    echo ${adb_cmd}
-    output=$(eval "$adb_cmd")
-    echo "$output"
-    exit 1
+    execute_command "shell input keyevent 26"
 fi
 
 if  [[ $operation = "-unlock" ]]; then
@@ -72,8 +80,7 @@ if  [[ $operation = "-unlock" ]]; then
 ############################################################
 
     echo "--------- Unlock screen"
-    adb shell input keyevent 82
-    exit 1
+    execute_command "shell input keyevent 82"
 fi
 
 if  [[ $operation = "-wifion" ]]; then
@@ -82,8 +89,7 @@ if  [[ $operation = "-wifion" ]]; then
 ############################################################
 
     echo "--------- Enable wifi"
-    adb shell 'svc wifi enable'
-    exit 1
+    execute_command "shell 'svc wifi enable'"
 fi
 
 if  [[ $operation = "-wifioff" ]]; then
@@ -92,6 +98,5 @@ if  [[ $operation = "-wifioff" ]]; then
 ############################################################
 
     echo "--------- Disable wifi"
-    adb shell 'svc wifi disable'
-    exit 1
+    execute_command "shell 'svc wifi disable'"
 fi
