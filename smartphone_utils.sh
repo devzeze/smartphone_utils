@@ -104,23 +104,33 @@ execute_command() {
     exit 1
 }
 
+check_parameters() {
+
+    if [ $1 -lt $2 ]; then
+        echo "--------- Wrong arguments, check sh smartphone_utils.sh -h"
+        exit 1
+    fi
+}
+
 if [ ! "$1" ]; then
    echo "--------- Empty argument, please run"
 fi
 
 if [ ! "$1" ] || [[ $1 = "-h" ]]; then
    echo "--------- sh smartphone_utils.sh [-d [device_id]] with options:"
-   echo "--------- -h                           Help"
-   echo "--------- -list                        List all devices"
-   echo "--------- -lock                        Lock the screen"
-   echo "--------- -unlock                      Unlock the screen"
-   echo "--------- -wifion                      Enable Wifi"
-   echo "--------- -wifioff                     Disable Wifi"
-   echo "--------- -cat_file                    Show file content [package] [file]"
-   echo "--------- -screenrecord [file]         Record screen to file [file] on Movies folder"
-   echo "--------- -pullrecord [file] [path]    Record record screen [file] to [path]"
-   
-   echo "--------- -reboot                      Reboot device"
+   echo "--------- -h                               Help"
+   echo "--------- -list                            List all devices"
+   echo "--------- -lock                            Lock the screen"
+   echo "--------- -unlock                          Unlock the screen"
+   echo "--------- -wifion                          Enable Wifi"
+   echo "--------- -wifioff                         Disable Wifi"
+   echo "--------- -cat_file                        Show file content [package] [file]"
+   echo "--------- -screenrecord [file]             Record screen to file [file] on Movies folder"
+   echo "--------- -pullrecord [file] [path]        Pull record screen [file] to [path]"
+   echo "--------- -screenshot [file]               Takes screenshot to file [file] on Images folder"
+   echo "--------- -pullscreenshot [file] [path]    Pull screenshot [file] to [path]"
+   echo "--------- -pullfile [file] [path]          Pull file [file] to [path]"
+   echo "--------- -reboot                          Reboot device"
    exit 1
 fi
 
@@ -131,6 +141,8 @@ fi
 
 adb_cmd="adb"
 operation=$1
+arg1=$2
+arg2=$3
 
 if  [[ $1 = "-d" ]]; then
 ############################################################
@@ -138,6 +150,8 @@ if  [[ $1 = "-d" ]]; then
 ############################################################
     adb_cmd="${adb_cmd} -s $2"
     operation=$3
+    arg1=$4
+    arg2=$5
 fi
 
 
@@ -145,9 +159,10 @@ if  [[ $operation = "-list" ]]; then
 ############################################################
 #           command list devices
 ############################################################
-
+    
+    check_parameters $# 1
     echo "--------- Devices"
-    adb devices -l
+    execute_command "devices -l"
     exit 1
 fi
 
@@ -156,6 +171,7 @@ if  [[ $operation = "-reboot" ]]; then
 #           command reboot device
 ############################################################
 
+    check_parameters $# 1
     echo "--------- Reboot"    
     execute_command "reboot"
 fi
@@ -165,6 +181,7 @@ if  [[ $operation = "-lock" ]]; then
 #           command lock screen
 ############################################################
 
+    check_parameters $# 1
     echo "--------- Lock screen"
     execute_command "shell input keyevent $KEYCODE_POWER"
 fi
@@ -174,6 +191,7 @@ if  [[ $operation = "-unlock" ]]; then
 #           command unlock screen
 ############################################################
 
+    check_parameters $# 1
     echo "--------- Unlock screen"
     execute_command "shell input keyevent $KEYCODE_MENU_2"
 fi
@@ -183,6 +201,7 @@ if  [[ $operation = "-wifion" ]]; then
 #           command enable wifi
 ############################################################
 
+    check_parameters $# 1
     echo "--------- Enable wifi"
     execute_command "shell 'svc wifi enable'"
 fi
@@ -192,6 +211,7 @@ if  [[ $operation = "-wifioff" ]]; then
 #           command disable wifi
 ############################################################
 
+    check_parameters $# 1
     echo "--------- Disable wifi"
     execute_command "shell 'svc wifi disable'"
 fi
@@ -201,8 +221,9 @@ if  [[ $operation = "-cat_file" ]]; then
 #           command show file content
 ############################################################
 
-    echo "--------- Show file content $3 of $2"
-    execute_command "shell run-as $2 cat $3"
+    check_parameters $# 3
+    echo "--------- Show file content $arg2 of $arg1"
+    execute_command "shell run-as $arg1 cat $arg2"
 fi
 
 if  [[ $operation = "-screenrecord" ]]; then
@@ -210,8 +231,29 @@ if  [[ $operation = "-screenrecord" ]]; then
 #           command record screen
 ############################################################
 
-    echo "--------- Record screen to file $2"
-    execute_command "shell screenrecord /storage/self/primary/Movies/$2.mp4"
+    check_parameters $# 2
+    echo "--------- Record screen to file $arg1"
+    execute_command "shell screenrecord /storage/self/primary/Movies/$arg1.mp4"
+fi
+
+if  [[ $operation = "-screenshot" ]]; then
+############################################################
+#           command screenshot screen
+############################################################
+
+    check_parameters $# 2
+    echo "--------- Takes screenshot to file $arg1"
+    execute_command "shell screencap -p /storage/self/primary/Pictures/$arg1.png"
+fi
+
+if  [[ $operation = "-pullfile" ]]; then
+############################################################
+#           command pull the file
+############################################################
+
+    check_parameters $# 3
+    echo "--------- Pull the file file $arg1 to $arg2"
+    execute_command "pull $arg1 $arg2"
 fi
 
 if  [[ $operation = "-pullrecord" ]]; then
@@ -219,7 +261,27 @@ if  [[ $operation = "-pullrecord" ]]; then
 #           command pull the record screen file
 ############################################################
 
-    echo "--------- Pull the record file $2 to $3"
-    execute_command "pull /storage/self/primary/Movies/$2.mp4 $3"
+    check_parameters $# 3
+    echo "--------- Pull the record file $arg1 to $arg2"
+    execute_command "pull /storage/self/primary/Movies/$arg1.mp4 $arg2"
 fi
 
+if  [[ $operation = "-pullscreenshot" ]]; then
+############################################################
+#           command pull the screenshot file
+############################################################
+
+    check_parameters $# 3
+    echo "--------- Pull the record file $arg1 to $arg2"
+    execute_command "pull /storage/self/primary/Pictures/$arg1.png $arg2"
+fi
+
+if  [[ $operation = "-pushfule" ]]; then
+############################################################
+#           command pull the record screen file
+############################################################
+
+    check_parameters $# 3
+    echo "--------- Push the file $arg1 to $arg2"
+    execute_command "pull /storage/self/primary/Movies/$arg1.mp4 $arg2"
+fi
